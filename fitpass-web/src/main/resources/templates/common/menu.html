@@ -6,17 +6,17 @@
   </div>
   <ul class="nav navbar-nav sub-menu">
     <li>
-      <a th:href="@{/}" th:classappend="${(page == 11) ? 'active' : ''}">
+      <a th:href="@{/}" th:classappend="${(page == 1) ? 'active' : ''}">
         <i class="fas fa-bowling-ball text-danger fa-fw"></i>Billiards
       </a>
     </li>
     <li>
-      <a th:href="@{/}" th:classappend="${(page == 41) ? 'active' : ''}">
+      <a th:href="@{/}" th:classappend="${(page == 2) ? 'active' : ''}">
         <i class="fas fa-list-ul text-warning fa-fw"></i>Đơn hàng
       </a>
     </li>
     <li>
-      <a th:href="@{//}" th:classappend="${page == 51 ? 'active' : ''}">
+      <a th:href="@{//}" th:classappend="${(page == 3) ? 'active' : ''}">
         <i class="fas fa-list text-sea-green fa-fw"></i>Lịch sử đơn hàng
       </a>
     </li>

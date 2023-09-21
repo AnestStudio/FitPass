@@ -5,19 +5,21 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.rememberme.InMemoryTokenRepositoryImpl;
-import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.security.web.authentication.RememberMeServices;
+import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable) //http.csrf().disable();
+    public SecurityFilterChain filterChain(HttpSecurity http, RememberMeServices rememberMeServices) throws Exception {
+        //http.csrf().disable();
+        http.csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                 .requestMatchers("/css/**", "/images/**", "/js/**", "/webfonts/**").permitAll()
                 .requestMatchers("/login", "/logout").permitAll()
@@ -27,8 +29,7 @@ public class WebSecurityConfig {
                 .anyRequest().authenticated()
             )
             .formLogin(formLogin -> formLogin
-                // Submit URL login
-                //.loginProcessingUrl("/j_spring_security_check")
+                //.loginProcessingUrl("/j_spring_security_check")   // submit URL login
                 .loginPage("/login")
                 .usernameParameter("account")
                 .passwordParameter("password")
@@ -40,26 +41,26 @@ public class WebSecurityConfig {
                 .logoutSuccessUrl("/login?logout")                  // default url
                 .invalidateHttpSession(true)                        // default: true
                 .deleteCookies("JSESSIONID")
+            )
+            .rememberMe((remember) -> remember
+                    .rememberMeServices(rememberMeServices)
             );
-//            .httpBasic(withDefaults())
-//                .rememberMe((remember) -> remember.rememberMeServices(rememberMeServices)
-//            );
         return http.build();
     }
 
-//    @Bean
-//    RememberMeServices rememberMeServices(UserDetailsService userDetailsService) {
-//        TokenBasedRememberMeServices.RememberMeTokenAlgorithm encodingAlgorithm = TokenBasedRememberMeServices.RememberMeTokenAlgorithm.SHA256;
-//        TokenBasedRememberMeServices rememberMe = new TokenBasedRememberMeServices("uniqueAndSecret", userDetailsService, encodingAlgorithm);
-//        rememberMe.setMatchingAlgorithm(TokenBasedRememberMeServices.RememberMeTokenAlgorithm.MD5);
-//        return rememberMe;
-//    }
-
     @Bean
-    public PersistentTokenRepository persistentTokenRepository() {
-        // Save remember me in memory (RAM)
-        return new InMemoryTokenRepositoryImpl();
+    RememberMeServices rememberMeServices(UserDetailsService userDetailsService) {
+        TokenBasedRememberMeServices.RememberMeTokenAlgorithm encodingAlgorithm = TokenBasedRememberMeServices.RememberMeTokenAlgorithm.SHA256;
+        TokenBasedRememberMeServices rememberMe = new TokenBasedRememberMeServices("FitPass", userDetailsService, encodingAlgorithm);
+        rememberMe.setMatchingAlgorithm(TokenBasedRememberMeServices.RememberMeTokenAlgorithm.SHA256);
+        return rememberMe;
     }
+
+//    @Bean
+//    public PersistentTokenRepository persistentTokenRepository() {
+//        // Save remember me in memory (RAM)
+//        return new InMemoryTokenRepositoryImpl();
+//    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
